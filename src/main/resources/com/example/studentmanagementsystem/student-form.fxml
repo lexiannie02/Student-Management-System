@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" spacing="8" prefWidth="380" prefHeight="420"
+      fx:controller="com.example.studentmanagementsystem.StudentFormController">
+    <padding>
+        <Insets topRightBottomLeft="12"/>
+    </padding>
+    <Label fx:id="titleLabel" style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Student"/>
+
+    <GridPane hgap="10" vgap="8">
+        <columnConstraints>
+            <ColumnConstraints minWidth="120" halignment="RIGHT" />
+            <ColumnConstraints hgrow="ALWAYS" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints minHeight="30" />
+            <RowConstraints minHeight="30" />
+            <RowConstraints minHeight="30" />
+            <RowConstraints minHeight="30" />
+            <RowConstraints minHeight="30" />
+            <RowConstraints minHeight="30" />
+            <RowConstraints minHeight="30" />
+        </rowConstraints>
+        <children>
+            <Label text="ID Number" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+            <TextField fx:id="idField" promptText="e.g., 2025-0001" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+
+            <Label text="Full Name" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+            <TextField fx:id="fullNameField" promptText="e.g., Juan Dela Cruz" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+
+            <Label text="Age" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+            <TextField fx:id="ageField" promptText="e.g., 20" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+
+            <Label text="Address" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+            <TextField fx:id="addressField" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+
+            <Label text="Course &amp; Year" GridPane.rowIndex="4" GridPane.columnIndex="0" />
+            <TextField fx:id="courseField" promptText="e.g., BSCS 3" GridPane.rowIndex="4" GridPane.columnIndex="1" />
+
+            <Label text="Birthday" GridPane.rowIndex="5" GridPane.columnIndex="0" />
+            <DatePicker fx:id="birthdayPicker" GridPane.rowIndex="5" GridPane.columnIndex="1" />
+
+            <Label text="Email" GridPane.rowIndex="6" GridPane.columnIndex="0" />
+            <TextField fx:id="emailField" GridPane.rowIndex="6" GridPane.columnIndex="1" />
+        </children>
+    </GridPane>
+
+    <Label fx:id="errorLabel" textFill="red" wrapText="true" />
+
+    <HBox spacing="8" alignment="CENTER">
+        <Button fx:id="cancelButton" text="Cancel" onAction="#onCancel" />
+        <Button fx:id="okButton" text="OK" onAction="#onOk" />
+    </HBox>
+</VBox>

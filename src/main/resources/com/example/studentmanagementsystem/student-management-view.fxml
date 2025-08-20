@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.studentmanagementsystem.StudentManagementController">
+    <top>
+        <HBox spacing="10">
+            <padding>
+                <Insets topRightBottomLeft="10"/>
+            </padding>
+            <Label text="Search:" />
+            <TextField fx:id="searchField" HBox.hgrow="ALWAYS" promptText="Search by any field" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button text="Add..." onAction="#onAdd" />
+            <Button text="Edit..." onAction="#onUpdate" />
+            <Button text="Delete" onAction="#onDelete" />
+            <Button text="Reload" onAction="#onReload" />
+            <Button text="Save" onAction="#onSave" />
+            <Button text="Logout" onAction="#onLogout" />
+        </HBox>
+    </top>
+    <center>
+        <TableView fx:id="table" prefHeight="400" prefWidth="600">
+            <columns>
+                <TableColumn fx:id="idCol" text="ID" prefWidth="120" />
+                <TableColumn fx:id="fullNameCol" text="Full Name" prefWidth="180" />
+                <TableColumn fx:id="ageCol" text="Age" prefWidth="60" />
+                <TableColumn fx:id="addressCol" text="Address" prefWidth="160" />
+                <TableColumn fx:id="courseCol" text="Course &amp; Year" prefWidth="140" />
+                <TableColumn fx:id="birthdayCol" text="Birthday" prefWidth="110" />
+                <TableColumn fx:id="emailCol" text="Email" prefWidth="160" />
+            </columns>
+        </TableView>
+    </center>
+    <bottom>
+        <HBox spacing="16">
+            <padding>
+                <Insets topRightBottomLeft="10"/>
+            </padding>
+            <Label fx:id="statusLabel" />
+            <Label fx:id="errorLabel" textFill="red" wrapText="true" />
+        </HBox>
+    </bottom>
+</BorderPane>

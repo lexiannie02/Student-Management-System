@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" spacing="12" alignment="CENTER"
+      fx:controller="com.example.studentmanagementsystem.LoginController">
+    <padding>
+        <Insets topRightBottomLeft="24" />
+    </padding>
+    <Label text="Student Management System" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+    <GridPane hgap="10" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints halignment="CENTER" minWidth="120" />
+            <ColumnConstraints hgrow="ALWAYS" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints minHeight="30" />
+            <RowConstraints minHeight="30" />
+        </rowConstraints>
+        <children>
+            <Label text="Username:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+            <TextField fx:id="usernameField" promptText="admin" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+
+            <Label text="Password:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+            <PasswordField fx:id="passwordField" promptText="admin" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+        </children>
+    </GridPane>
+    <Button fx:id="loginButton" text="Login" onAction="#onLoginClick" maxWidth="150" />
+    <Label fx:id="errorLabel" textFill="red" />
+</VBox>
