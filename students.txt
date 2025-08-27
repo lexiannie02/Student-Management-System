@@ -1,0 +1,3 @@
+101|Alexandra Mendoza|20|Tibungco Davao City|BSIT 2|2015-09-11|alexandra@gmail.com
+102|Tanya Fontanilla|20|Samal|BSIT 2|2025-08-09|alexa@gmail.com
+103|Tanya Fontanilla II|90|Samal|BSIT 2|2025-08-06|alexa22@gmail.com

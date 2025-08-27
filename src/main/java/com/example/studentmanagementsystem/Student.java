@@ -65,40 +65,55 @@ public class Student {
     public void setEmail(String value) { email.set(value); }
     public StringProperty emailProperty() { return email; }
 
+    /**
+     * Persist student to single line using '|' delimiter and custom escaping.
+     * Escapes: backslash -> \\ , newline -> \n , carriage return -> \r , pipe -> \p
+     */
     public String toCsv() {
-        // New format: ID(int), FullName, Age, Address, CourseYear, Birthday(ISO), Email
-        return getIdNumber() + "," + escape(getFullName()) + "," + getAge() + "," + escape(getAddress()) + "," +
-                escape(getCourseYear()) + "," + (getBirthday() == null ? "" : getBirthday().format(DateTimeFormatter.ISO_DATE)) + "," +
-                escape(getEmail());
+        return getIdNumber() + "|" +
+                encode(getFullName()) + "|" +
+                getAge() + "|" +
+                encode(getAddress()) + "|" +
+                encode(getCourseYear()) + "|" +
+                (getBirthday() == null ? "" : getBirthday().format(DateTimeFormatter.ISO_DATE)) + "|" +
+                encode(getEmail());
     }
 
-    public static Student fromCsv(String line) {
-        // Try new format (7 fields). If only 6 fields, treat as legacy without fullName.
-        String[] parts = CsvUtil.splitCsv(line, 7);
-        if (parts == null) return null;
-        boolean legacy = countCommas(line) < 6;
+    /**
+     * Flexible parser supporting both the new single-line pipe-delimited format and
+     * the legacy 7-line block format separated by newlines.
+     */
+    public static Student fromCsv(String data) {
+        if (data == null || data.isEmpty()) return null;
         try {
-            if (legacy) {
-                // Legacy: ID, Age, Address, CourseYear, Birthday, Email
+            String[] parts;
+            boolean legacyBlock = !data.contains("|") && data.chars().filter(ch -> ch == '\n').count() >= 6;
+            if (legacyBlock) {
+                parts = data.split("\n", 7);
+                if (parts.length < 7) return null;
                 int id = parseIntSafe(parts[0]);
-                int age = parseIntSafe(parts[1]);
-                String address = CsvUtil.unescape(parts[2]);
-                String courseYear = CsvUtil.unescape(parts[3]);
-                LocalDate dob = null;
-                try { dob = parts[4].isBlank() ? null : LocalDate.parse(parts[4]); } catch (Exception ignored) {}
-                String email = CsvUtil.unescape(parts[5]);
-                if (id <= 0) return null; // skip invalid legacy rows
-                return new Student(id, "", age, address, courseYear, dob, email);
-            } else {
-                // New: ID, FullName, Age, Address, CourseYear, Birthday, Email
-                int id = parseIntSafe(parts[0]);
-                String fullName = CsvUtil.unescape(parts[1]);
+                String fullName = parts[1];
                 int age = parseIntSafe(parts[2]);
-                String address = CsvUtil.unescape(parts[3]);
-                String courseYear = CsvUtil.unescape(parts[4]);
+                String address = parts[3];
+                String courseYear = parts[4];
                 LocalDate dob = null;
                 try { dob = parts[5].isBlank() ? null : LocalDate.parse(parts[5]); } catch (Exception ignored) {}
-                String email = CsvUtil.unescape(parts[6]);
+                String email = parts[6];
+                if (id <= 0) return null;
+                return new Student(id, fullName, age, address, courseYear, dob, email);
+            } else {
+                parts = data.split("\\|", -1);
+                if (parts.length < 7) return null;
+                int id = parseIntSafe(parts[0]);
+                String fullName = decode(parts[1]);
+                int age = parseIntSafe(parts[2]);
+                String address = decode(parts[3]);
+                String courseYear = decode(parts[4]);
+                LocalDate dob = null;
+                if (!parts[5].isBlank()) {
+                    try { dob = LocalDate.parse(parts[5]); } catch (Exception ignored) {}
+                }
+                String email = decode(parts[6]);
                 if (id <= 0) return null;
                 return new Student(id, fullName, age, address, courseYear, dob, email);
             }
@@ -107,36 +122,45 @@ public class Student {
         }
     }
 
-    private static int countCommas(String s) {
-        if (s == null) return 0;
-        int c = 0;
-        boolean inQuotes = false;
-        for (int i = 0; i < s.length(); i++) {
-            char ch = s.charAt(i);
-            if (ch == '"') {
-                inQuotes = !inQuotes;
-            } else if (ch == ',' && !inQuotes) {
-                c++;
-            }
-        }
-        return c;
+    private static String encode(String s) {
+        if (s == null) return "";
+        return s
+                .replace("\\", "\\\\")
+                .replace("|", "\\p")
+                .replace("\r", "\\r")
+                .replace("\n", "\\n");
     }
 
-    private static String escape(String s) {
+    private static String decode(String s) {
         if (s == null) return "";
-        if (s.contains(",") || s.contains("\"") || s.contains("\n") || s.contains("\r")) {
-            return '"' + s.replace("\"", "\"\"") + '"';
+        StringBuilder out = new StringBuilder();
+        boolean escape = false;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (!escape) {
+                if (c == '\\') {
+                    escape = true;
+                } else {
+                    out.append(c);
+                }
+            } else {
+                switch (c) {
+                    case 'n': out.append('\n'); break;
+                    case 'r': out.append('\r'); break;
+                    case 'p': out.append('|'); break;
+                    case '\\': out.append('\\'); break;
+                    default: out.append(c); break; // unknown sequence, keep literal
+                }
+                escape = false;
+            }
         }
-        return s;
+        if (escape) out.append('\\');
+        return out.toString();
     }
 
     private static int parseIntSafe(String s) {
         if (s == null) return 0;
-        try {
-            return Integer.parseInt(s.trim());
-        } catch (Exception e) {
-            return 0;
-        }
+        try { return Integer.parseInt(s.trim()); } catch (Exception e) { return 0; }
     }
 
     @Override
@@ -154,41 +178,7 @@ public class Student {
 }
 
 class CsvUtil {
-    // Simple CSV splitter supporting quotes
-    public static String[] splitCsv(String line, int expected) {
-        if (line == null) return null;
-        String[] out = new String[expected];
-        StringBuilder sb = new StringBuilder();
-        int idx = 0;
-        boolean inQuotes = false;
-        for (int i = 0; i < line.length(); i++) {
-            char c = line.charAt(i);
-            if (inQuotes) {
-                if (c == '"') {
-                    if (i + 1 < line.length() && line.charAt(i + 1) == '"') {
-                        sb.append('"');
-                        i++;
-                    } else {
-                        inQuotes = false;
-                    }
-                } else {
-                    sb.append(c);
-                }
-            } else {
-                if (c == '"') {
-                    inQuotes = true;
-                } else if (c == ',') {
-                    if (idx < expected) out[idx++] = sb.toString();
-                    sb.setLength(0);
-                } else {
-                    sb.append(c);
-                }
-            }
-        }
-        if (idx < expected) out[idx++] = sb.toString();
-        while (idx < expected) out[idx++] = "";
-        return out;
-    }
-
+    // Retained for backward compatibility (now trivial)
+    public static String[] splitCsv(String line, int expected) { return new String[]{ line }; }
     public static String unescape(String s) { return s == null ? "" : s; }
 }
